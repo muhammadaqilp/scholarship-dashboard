@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "data:build": "tsx scripts/build-data.ts",
-    "predev": "npm run data:build",
-    "prebuild": "npm run data:build",
+    "access:build": "tsx scripts/build-access-code.ts",
+    "predev": "npm run data:build && npm run access:build",
+    "prebuild": "npm run data:build && npm run access:build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

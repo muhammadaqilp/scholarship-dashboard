@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAccessGate } from "@/components/AccessGate";
 import { Brand } from "@/components/Brand";
 import { DetailModal } from "@/components/DetailModal";
+import { LoadingShell } from "@/components/LoadingShell";
 import { ToastRoot } from "@/components/Toast";
 import { LandingScreen } from "@/components/screens/LandingScreen";
 import { OnboardingScreen } from "@/components/screens/OnboardingScreen";
@@ -34,6 +36,7 @@ export function App() {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
   const confettiRef = useRef<HTMLCanvasElement>(null);
+  const accessGate = useAccessGate();
 
   useEffect(() => {
     // localStorage doesn't exist during SSR/first paint, so it can't be read
@@ -60,14 +63,7 @@ export function App() {
   const countryTags = useMemo(() => getAllCountryTags(), []);
 
   if (!persisted) {
-    return (
-      <div id="app">
-        <header className="topbar">
-          <Brand />
-        </header>
-        <main id="main" />
-      </div>
-    );
+    return <LoadingShell />;
   }
 
   function setName(name: string) {
@@ -154,6 +150,19 @@ export function App() {
           {screen === "results" && (
             <div className="fav-pill" onClick={() => setShowFavoritesOnly((v) => !v)}>
               ❤️ {persisted.favorites.length} disimpan
+            </div>
+          )}
+          {accessGate && (
+            <div
+              className="fav-pill"
+              title="Kunci Scholarship Quest"
+              onClick={() => {
+                if (window.confirm("Kunci Scholarship Quest? Kamu harus masukin kode akses lagi buat buka lagi nanti.")) {
+                  accessGate.onLock();
+                }
+              }}
+            >
+              🔒
             </div>
           )}
         </div>
