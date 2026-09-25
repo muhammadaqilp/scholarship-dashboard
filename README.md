@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scholarship Quest
 
-## Getting Started
+Offline-first scholarship matching app. The Excel workbook in `data/source/` is
+the source of truth for scholarship data; matching runs entirely in the
+browser with no AI/search calls. See `AGENTS.md` for Next.js version notes.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). `npm run dev` and `npm run build`
+both regenerate `data/generated/*.json` from the Excel file and the access
+code hash automatically (see `predev`/`prebuild` in `package.json`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Both are set via `.env.local` (gitignored, never committed - copy
+`.env.local.example` to start). Changing either only requires editing the
+one value and rebuilding; nothing else in the codebase references them.
 
-## Learn More
+| Variable | Purpose |
+| --- | --- |
+| `SCHOLARSHIP_QUEST_ACCESS_CODE` | The one static access code customers use to unlock the app after purchase. Only its SHA-256 hash is baked into the client bundle - the plaintext code is never shipped to the browser. If unset, a placeholder dev code (`SQ-2026-DEMO`) is used and a `.env.local` is auto-created with it on first build. |
+| `NEXT_PUBLIC_PURCHASE_URL` | Optional link shown on the access screen ("Beli akses Scholarship Quest dulu, ya") for customers who don't have a code yet. If unset, that line renders as plain text with no link. |
 
-To learn more about Next.js, take a look at the following resources:
+The access gate is a client-side check, not real authentication - see the
+comment at the top of `src/components/AccessGate.tsx` for the honest
+tradeoff. Its job is to stop casual access and give paying customers a clean
+unlock experience, not to run a license-management platform.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Updating scholarship data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Replace `data/source/scholarship-calendar.xlsx` with a new export from the
+same "Full Database" sheet layout, then run `npm run data:build` (or just
+`npm run dev` / `npm run build`, which do it automatically).
 
-## Deploy on Vercel
+## Deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploys cleanly to [Vercel](https://vercel.com/new) - it auto-detects Next.js.
+Set both env vars above in the Vercel project's Environment Variables before
+the first deploy.
